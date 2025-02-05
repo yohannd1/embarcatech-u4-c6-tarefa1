@@ -10,9 +10,12 @@
 #define LED_BLUE_PIN 13
 #define BUTTON_A_PIN 5
 #define BUTTON_B_PIN 6
+
 #define DISPLAY_SDA_PIN 14
 #define DISPLAY_SCL_PIN 15
 #define DISPLAY_I2C_PORT i2c1 // TODO: usar i2c0?
+#define DISPLAY_WIDTH 128
+#define DISPLAY_HEIGHT 64
 
 static void die(const char *msg);
 static void on_press(uint gpio, uint32_t events);
@@ -24,7 +27,7 @@ int main(void) {
 
 	ws2812b_matrix_t mt;
 	if (!ws2812b_matrix_init(&mt, pio0, LED_STRIP_PIN))
-		die("falha ao inicializar a Matriz de LEDs");
+		die("falha ao inicializar a matriz de LEDs");
 
 	gpio_init(LED_RED_PIN);
 	gpio_set_dir(LED_RED_PIN, GPIO_OUT);
@@ -54,8 +57,8 @@ int main(void) {
 	gpio_pull_up(DISPLAY_SCL_PIN);
 
 	ssd1306_t disp;
-	ssd1306_init(&disp, WIDTH, HEIGHT, false, 0x3C, DISPLAY_I2C_PORT);
-	ssd1306_config(&disp);
+	if (!ssd1306_init(&disp, DISPLAY_WIDTH, DISPLAY_HEIGHT, false, 0x3C, DISPLAY_I2C_PORT))
+		die("falha ao inicializar o display OLED");
 
 	ssd1306_send_data(&disp);
 	ssd1306_fill(&disp, false);
