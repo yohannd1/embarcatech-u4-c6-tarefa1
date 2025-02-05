@@ -29,6 +29,7 @@ pico_sdk_init()
 
 add_executable(${PROJECT}
     src/main.c
+    src/ws2812b_matrix.c
 )
 
 pico_set_program_name(${PROJECT} "${PROJECT}")
@@ -37,12 +38,15 @@ pico_set_program_version(${PROJECT} "0.1")
 pico_enable_stdio_usb(${PROJECT} 1)
 pico_enable_stdio_uart(${PROJECT} 0)
 
+pico_generate_pio_header(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/src/ws2812b.pio)
+
 target_include_directories(${PROJECT} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}
 )
 
 target_link_libraries(${PROJECT}
     pico_stdlib
+    hardware_pio
 )
 
 pico_add_extra_outputs(${PROJECT})
