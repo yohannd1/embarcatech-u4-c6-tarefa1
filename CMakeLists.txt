@@ -30,6 +30,7 @@ pico_sdk_init()
 add_executable(${PROJECT}
     src/main.c
     src/ws2812b_matrix.c
+    src/ssd1306.c
 )
 
 pico_set_program_name(${PROJECT} "${PROJECT}")
@@ -47,6 +48,7 @@ target_include_directories(${PROJECT} PRIVATE
 target_link_libraries(${PROJECT}
     pico_stdlib
     hardware_pio
+    hardware_i2c
 )
 
 pico_add_extra_outputs(${PROJECT})

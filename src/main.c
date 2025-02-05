@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "ws2812b_matrix.h"
+#include "ssd1306.h"
 
 #define LED_STRIP_PIN 7
 #define LED_RED_PIN 12
@@ -9,8 +10,9 @@
 #define LED_BLUE_PIN 13
 #define BUTTON_A_PIN 5
 #define BUTTON_B_PIN 6
-#define OLED_DISPLAY_SDA_PIN 14
-#define OLED_DISPLAY_SCL_PIN 15
+#define DISPLAY_SDA_PIN 14
+#define DISPLAY_SCL_PIN 15
+#define DISPLAY_I2C_PORT i2c1 // TODO: usar i2c0?
 
 static void die(const char *msg);
 static void on_press(uint gpio, uint32_t events);
@@ -23,9 +25,6 @@ int main(void) {
 	ws2812b_matrix_t mt;
 	if (!ws2812b_matrix_init(&mt, pio0, LED_STRIP_PIN))
 		die("falha ao inicializar a Matriz de LEDs");
-
-	/* ssd1306_t oled; */
-	// TODO: init ssd1306_t
 
 	gpio_init(LED_RED_PIN);
 	gpio_set_dir(LED_RED_PIN, GPIO_OUT);
@@ -47,8 +46,35 @@ int main(void) {
 	gpio_set_irq_enabled_with_callback(BUTTON_A_PIN, GPIO_IRQ_EDGE_FALL, true, &on_press);
 	gpio_set_irq_enabled_with_callback(BUTTON_B_PIN, GPIO_IRQ_EDGE_FALL, true, &on_press);
 
+	// inicializar o I2C para o display
+	i2c_init(DISPLAY_I2C_PORT, 400000); // 400KHz
+	gpio_set_function(DISPLAY_SDA_PIN, GPIO_FUNC_I2C);
+	gpio_set_function(DISPLAY_SCL_PIN, GPIO_FUNC_I2C);
+	gpio_pull_up(DISPLAY_SDA_PIN);
+	gpio_pull_up(DISPLAY_SCL_PIN);
+
+	ssd1306_t disp;
+	ssd1306_init(&disp, WIDTH, HEIGHT, false, 0x3C, DISPLAY_I2C_PORT);
+	ssd1306_config(&disp);
+
+	ssd1306_send_data(&disp);
+	ssd1306_fill(&disp, false);
+	ssd1306_send_data(&disp);
+
+	uint32_t counter = 0;
 	while (true) {
-		sleep_ms(10000);
+		bool even = (counter % 2) == 0;
+
+		ssd1306_fill(&disp, !even);
+		ssd1306_rect(&disp, 3, 3, 122, 58, even, !even);
+		ssd1306_draw_string(&disp, "AAA", 8, 10);
+		ssd1306_draw_string(&disp, "BBB", 20, 30);
+		ssd1306_draw_string(&disp, "CCC", 15, 48);
+		ssd1306_send_data(&disp);
+
+		sleep_ms(1000);
+
+		counter++;
 	}
 
 	return 0;
