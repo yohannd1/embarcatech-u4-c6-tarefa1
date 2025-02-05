@@ -70,7 +70,7 @@ int main(void) {
 
 		ssd1306_fill(&disp, !even);
 		ssd1306_rect(&disp, 3, 3, 122, 58, even, !even);
-		ssd1306_draw_string(&disp, "AAA", 8, 10);
+		ssd1306_draw_string(&disp, "BomDia", 8, 10);
 		ssd1306_draw_string(&disp, "BBB", 20, 30);
 		ssd1306_draw_string(&disp, "CCC", 15, 48);
 		ssd1306_send_data(&disp);
