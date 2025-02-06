@@ -24,7 +24,7 @@ static volatile _Atomic bool green_on = false;
 static volatile _Atomic bool blue_on = false;
 static volatile _Atomic char last_char = ' ';
 static const char *led_msg = "EmbarcaTech U4 C6";
-static ws2812b_matrix_t mt;
+static ws2812b_matrix_t matrix;
 static ssd1306_t display;
 static LedDisplay digit_reprs[10];
 
@@ -36,7 +36,9 @@ static void init_digit_reprs(LedDisplay *reprs);
 int main(void) {
 	stdio_init_all();
 
-	if (!ws2812b_matrix_init(&mt, pio0, LED_STRIP_PIN))
+	init_digit_reprs(digit_reprs);
+
+	if (!ws2812b_matrix_init(&matrix, pio0, LED_STRIP_PIN))
 		die("falha ao inicializar a matriz de LEDs");
 
 	gpio_init(LED_GREEN_PIN);
@@ -120,6 +122,10 @@ static bool update_display(struct repeating_timer *_) {
     uint32_t time_ms = to_us_since_boot(get_absolute_time()) / 1000;
 	bool bg_phase = (time_ms % 2000 < 1000);
 
+	int result = stdio_getchar_timeout_us(0);
+	if (result != PICO_ERROR_TIMEOUT)
+		last_char = (char)result;
+
 	ssd1306_fill(&display, !bg_phase);
 	ssd1306_rect(&display, 3, 3, 122, 58, bg_phase, !bg_phase);
 
@@ -132,14 +138,14 @@ static bool update_display(struct repeating_timer *_) {
 	ssd1306_send_data(&display);
 
 	if (last_char >= '0' && last_char <= '9')
-		ws2812b_matrix_draw(&mt, &digit_reprs[last_char - '0']);
+		ws2812b_matrix_draw(&matrix, &digit_reprs[last_char - '0']);
 
 	return true;
 }
 
 static void init_digit_reprs(LedDisplay *reprs) {
 	LedColor c0 = {0.0, 0.0, 0.0};
-	LedColor c1 = {0.4, 0.4, 0.4};
+	LedColor c1 = {0.05, 0.05, 0.05};
 
 	LedDisplay r0 = {
 		c0, c1, c1, c1, c0,
