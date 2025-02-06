@@ -49,6 +49,7 @@ target_link_libraries(${PROJECT}
     pico_stdlib
     hardware_pio
     hardware_i2c
+    hardware_timer
 )
 
 pico_add_extra_outputs(${PROJECT})

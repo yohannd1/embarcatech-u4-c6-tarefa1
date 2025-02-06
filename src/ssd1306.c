@@ -142,7 +142,8 @@ void ssd1306_vline(ssd1306_t *disp, uint8_t x, uint8_t y0, uint8_t y1, bool valu
 
 uint8_t ssd1306_draw_char(ssd1306_t *disp, char c, uint8_t x, uint8_t y) {
 	uint16_t index = 0;
-	if (c >= 'A' && c <= 'Z') index = (c - 'A' + 11) * 8;
+	if (c == ' ') return 4;
+	else if (c >= 'A' && c <= 'Z') index = (c - 'A' + 11) * 8;
 	else if (c >= 'a' && c <= 'z') index = (c - 'a' + 37) * 8;
 	else if (c >= '0' && c <= '9') index = (c - '0' + 1) * 8;
 
@@ -158,7 +159,10 @@ uint8_t ssd1306_draw_char(ssd1306_t *disp, char c, uint8_t x, uint8_t y) {
 	return width;
 }
 
-void ssd1306_draw_string(ssd1306_t *disp, const char *str, uint8_t x, uint8_t y) {
+void ssd1306_draw_string(ssd1306_t *disp, const char *str, uint8_t *x_, uint8_t *y_) {
+	uint8_t x = *x_;
+	uint8_t y = *y_;
+
 	for (int i = 0; str[i] != '\0' && y + 8 < disp->height; i++) {
 		uint8_t width = ssd1306_draw_char(disp, str[i], x, y);
 
@@ -169,4 +173,7 @@ void ssd1306_draw_string(ssd1306_t *disp, const char *str, uint8_t x, uint8_t y)
 			y += 8;
 		}
 	}
+
+	*x_ = x;
+	*y_ = y;
 }
